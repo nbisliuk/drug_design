@@ -1,0 +1,9 @@
+# Source articles, additiona info
+/external/
+
+# Chembl database downloadd
+/chembl_28/
+
+# Virtual environment
+/venv/
+/.idea/
