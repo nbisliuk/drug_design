@@ -1,7 +1,8 @@
 from rdkit import Chem
 from rdkit.Chem import MolStandardize
 from tqdm import tqdm
-import re
+from classes import Tokenizer
+
 
 class Preprocess:
 
@@ -9,7 +10,6 @@ class Preprocess:
         self.nrm = MolStandardize.normalize.Normalizer()
         self.lfc = MolStandardize.fragment.LargestFragmentChooser()
         self.uc = MolStandardize.charge.Uncharger()
-        self.pattern = re.compile("(\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\\\|\/|:|~|@|\?|>|\*|\$|\%[0-9]{2}|[0-9])")
 
     def clean(self, smi):
         mol = Chem.MolFromSmiles(smi)
@@ -21,8 +21,6 @@ class Preprocess:
         else:
             return None
 
-    def tokenize(self, smi):
-        return [token for token in self.pattern.findall(smi)]
 
 if __name__ == "__main__":
 
@@ -31,15 +29,16 @@ if __name__ == "__main__":
 
     print("Initial number of sequences %i" % len(smiles))
     p = Preprocess()
+    t = Tokenizer()
 
     # Normalization, uncharging, removing chirality and light fragments
     nn_smi = [p.clean(smile) for smile in tqdm(smiles)]
     unn_smi = list(set([smile for smile in nn_smi if smile]))
 
-    # Limit sequence length 34-74
+    # Limit sequence length 34-128
     cl_smi = []
     for smile in unn_smi:
-        if 34 <= len(p.tokenize(smile)) <= 74:
+        if 34 <= len(t.tokenize(smile)) <= 128:
             cl_smi.append(smile)
 
     print("Number of sequences after cleaning %i" % len(cl_smi))
